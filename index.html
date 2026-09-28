@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SAMP Community Hub | Real-time</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/10.14.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.0/firebase-firestore-compat.js"></script>
+</head>
+<body>
+  <!-- Loading -->
+  <div id="loading-screen">
+    <div class="loader">
+      <div class="loader-ring"></div>
+      <div class="loader-text">SAMP COMMUNITY</div>
+      <div class="loader-sub">Connecting...</div>
+    </div>
+  </div>
+
+  <!-- Auth Overlay -->
+  <div id="auth-overlay" class="overlay">
+    <div class="auth-container">
+      <div class="auth-header">
+        <h1><i class="fas fa-gamepad"></i> SAMP COMMUNITY</h1>
+        <p>Komunitas Real-time GTA San Andreas Multiplayer</p>
+      </div>
+      
+      <div class="auth-tabs">
+        <button class="auth-tab active" data-tab="login">Login</button>
+        <button class="auth-tab" data-tab="register">Daftar</button>
+      </div>
+
+      <form id="login-form" class="auth-form active">
+        <div class="form-group">
+          <label><i class="fas fa-user"></i> Username</label>
+          <input type="text" id="login-username" placeholder="Masukkan username" required>
+        </div>
+        <div class="form-group">
+          <label><i class="fas fa-lock"></i> Password</label>
+          <input type="password" id="login-password" placeholder="Password" required>
+        </div>
+        <button type="submit" class="btn-primary"><i class="fas fa-sign-in-alt"></i> Masuk</button>
+      </form>
+
+      <form id="register-form" class="auth-form">
+        <div class="form-group">
+          <label><i class="fas fa-user"></i> Username</label>
+          <input type="text" id="reg-username" placeholder="Username unik" required>
+        </div>
+        <div class="form-group">
+          <label><i class="fas fa-lock"></i> Password</label>
+          <input type="password" id="reg-password" placeholder="Minimal 6 karakter" required>
+        </div>
+        <div class="form-group">
+          <label><i class="fas fa-lock"></i> Ulangi Password</label>
+          <input type="password" id="reg-confirm" placeholder="Ulangi password" required>
+        </div>
+        <button type="submit" class="btn-primary"><i class="fas fa-user-plus"></i> Daftar</button>
+      </form>
+
+      <p class="auth-note">Data tersimpan real-time via Firebase. Siap dipakai banyak member.</p>
+    </div>
+  </div>
+
+  <!-- Main App -->
+  <div id="app" class="hidden">
+    <nav class="navbar">
+      <div class="nav-brand">
+        <i class="fas fa-car-side"></i>
+        <span>SAMP COMMUNITY</span>
+      </div>
+      <div class="nav-links">
+        <button class="nav-btn active" data-page="home"><i class="fas fa-home"></i> Home</button>
+        <button class="nav-btn" data-page="mods"><i class="fas fa-box-open"></i> Modpack</button>
+        <button class="nav-btn" data-page="chat"><i class="fas fa-comments"></i> Chat</button>
+        <button class="nav-btn" data-page="voice"><i class="fas fa-headset"></i> Voice War</button>
+        <button class="nav-btn" data-page="profile"><i class="fas fa-user-cog"></i> Profil</button>
+      </div>
+      <div class="nav-user">
+        <img id="nav-avatar" src="" alt="Avatar">
+        <span id="nav-username">Player</span>
+        <button id="logout-btn" title="Logout"><i class="fas fa-sign-out-alt"></i></button>
+      </div>
+    </nav>
+
+    <main class="main-content">
+      <!-- HOME -->
+      <section id="page-home" class="page active">
+        <div class="hero">
+          <div class="hero-content">
+            <h1>Selamat Datang di <span class="highlight">SAMP Community Hub</span></h1>
+            <p>Komunitas real-time. Share modpack, chat, dan voice war bersama member lain.</p>
+            <div class="hero-stats">
+              <div class="stat-card">
+                <i class="fas fa-users"></i>
+                <div>
+                  <h3 id="stat-members">-</h3>
+                  <span>Member</span>
+                </div>
+              </div>
+              <div class="stat-card">
+                <i class="fas fa-box"></i>
+                <div>
+                  <h3 id="stat-mods">-</h3>
+                  <span>Modpack</span>
+                </div>
+              </div>
+              <div class="stat-card">
+                <i class="fas fa-comments"></i>
+                <div>
+                  <h3 id="stat-online">-</h3>
+                  <span>Online</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="section">
+          <h2><i class="fas fa-star"></i> Fitur</h2>
+          <div class="feature-grid">
+            <div class="feature-card" data-goto="mods">
+              <i class="fas fa-box-open"></i>
+              <h3>Share Modpack</h3>
+              <p>Upload & download modpack dari semua member</p>
+            </div>
+            <div class="feature-card" data-goto="chat">
+              <i class="fas fa-comments"></i>
+              <h3>Chat Real-time</h3>
+              <p>Chat langsung dengan member lain</p>
+            </div>
+            <div class="feature-card" data-goto="voice">
+              <i class="fas fa-headset"></i>
+              <h3>Voice War</h3>
+              <p>Voice real-time via Discord</p>
+            </div>
+            <div class="feature-card" data-goto="profile">
+              <i class="fas fa-user-edit"></i>
+              <h3>Edit Profil</h3>
+              <p>Kustomisasi profil kamu</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- MODS -->
+      <section id="page-mods" class="page">
+        <div class="page-header">
+          <h2><i class="fas fa-box-open"></i> Share Modpack</h2>
+          <button id="btn-add-mod" class="btn-primary"><i class="fas fa-plus"></i> Share Baru</button>
+        </div>
+        <div class="search-bar">
+          <i class="fas fa-search"></i>
+          <input type="text" id="mod-search" placeholder="Cari modpack...">
+        </div>
+        <div id="mod-list" class="mod-grid"></div>
+
+        <div id="mod-modal" class="modal hidden">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h3>Share Modpack</h3>
+              <button class="modal-close">&times;</button>
+            </div>
+            <form id="mod-form">
+              <div class="form-group">
+                <label>Nama Modpack</label>
+                <input type="text" id="mod-name" required>
+              </div>
+              <div class="form-group">
+                <label>Deskripsi</label>
+                <textarea id="mod-desc" rows="3" required></textarea>
+              </div>
+              <div class="form-group">
+                <label>Link Download (MediaFire / Google Drive / dll)</label>
+                <input type="url" id="mod-link" required placeholder="https://...">
+              </div>
+              <div class="form-group">
+                <label>Kategori</label>
+                <select id="mod-category">
+                  <option value="Graphics">Graphics</option>
+                  <option value="Vehicles">Vehicles</option>
+                  <option value="Weapons">Weapons</option>
+                  <option value="Maps">Maps</option>
+                  <option value="Scripts">Scripts</option>
+                  <option value="Other">Lainnya</option>
+                </select>
+              </div>
+              <button type="submit" class="btn-primary">Publish</button>
+            </form>
+          </div>
+        </div>
+      </section>
+
+      <!-- CHAT -->
+      <section id="page-chat" class="page">
+        <div class="page-header">
+          <h2><i class="fas fa-comments"></i> Chat Publik (Real-time)</h2>
+          <span class="online-badge"><i class="fas fa-circle"></i> <span id="chat-online">0</span> online</span>
+        </div>
+        <div class="chat-container">
+          <div class="chat-sidebar">
+            <h4>Online Sekarang</h4>
+            <ul id="online-list"></ul>
+          </div>
+          <div class="chat-main">
+            <div id="chat-messages" class="chat-messages"></div>
+            <form id="chat-form" class="chat-input">
+              <input type="text" id="chat-input" placeholder="Ketik pesan..." autocomplete="off" maxlength="500" required>
+              <button type="submit"><i class="fas fa-paper-plane"></i></button>
+            </form>
+          </div>
+        </div>
+      </section>
+
+      <!-- VOICE -->
+      <section id="page-voice" class="page">
+        <div class="page-header">
+          <h2><i class="fas fa-headset"></i> Voice War / Perang</h2>
+          <p class="page-desc">Voice real-time menggunakan Discord. Paling stabil & gratis untuk komunitas gaming.</p>
+        </div>
+
+        <div class="voice-discord">
+          <div class="discord-card">
+            <div class="discord-icon"><i class="fab fa-discord"></i></div>
+            <div>
+              <h3>Join Discord Server Kami</h3>
+              <p>Semua voice channel perang ada di Discord. Klik tombol di bawah untuk masuk.</p>
+              <a id="discord-invite" href="https://discord.gg/YOUR_INVITE" target="_blank" class="btn-discord">
+                <i class="fab fa-discord"></i> Join Discord Server
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <div class="voice-rooms">
+          <div class="voice-room">
+            <div class="room-icon"><i class="fas fa-skull-crossbones"></i></div>
+            <div class="room-info">
+              <h3>Main War Room</h3>
+              <p>Koordinasi perang utama</p>
+            </div>
+            <a href="https://discord.gg/YOUR_INVITE" target="_blank" class="btn-join">
+              <i class="fas fa-external-link-alt"></i> Buka di Discord
+            </a>
+          </div>
+          <div class="voice-room">
+            <div class="room-icon faction-a"><i class="fas fa-shield-alt"></i></div>
+            <div class="room-info">
+              <h3>Faction Alpha</h3>
+              <p>Voice khusus Faction Alpha</p>
+            </div>
+            <a href="https://discord.gg/YOUR_INVITE" target="_blank" class="btn-join">
+              <i class="fas fa-external-link-alt"></i> Buka di Discord
+            </a>
+          </div>
+          <div class="voice-room">
+            <div class="room-icon faction-b"><i class="fas fa-fist-raised"></i></div>
+            <div class="room-info">
+              <h3>Faction Bravo</h3>
+              <p>Voice khusus Faction Bravo</p>
+            </div>
+            <a href="https://discord.gg/YOUR_INVITE" target="_blank" class="btn-join">
+              <i class="fas fa-external-link-alt"></i> Buka di Discord
+            </a>
+          </div>
+          <div class="voice-room">
+            <div class="room-icon tactical"><i class="fas fa-crosshairs"></i></div>
+            <div class="room-info">
+              <h3>Tactical Ops</h3>
+              <p>Planning & strategy</p>
+            </div>
+            <a href="https://discord.gg/YOUR_INVITE" target="_blank" class="btn-join">
+              <i class="fas fa-external-link-alt"></i> Buka di Discord
+            </a>
+          </div>
+        </div>
+
+        <div class="voice-note">
+          <i class="fas fa-info-circle"></i>
+          <div>
+            <p><strong>Kenapa pakai Discord?</strong></p>
+            <p>Voice chat real-time yang stabil, gratis, dan sudah biasa dipakai komunitas SAMP. Cukup ganti link invite Discord di file <code>config.js</code>.</p>
+            <p>Kalau mau voice langsung di website (tanpa Discord), butuh layanan berbayar seperti Agora atau LiveKit.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- PROFILE -->
+      <section id="page-profile" class="page">
+        <div class="page-header">
+          <h2><i class="fas fa-user-cog"></i> Edit Profil</h2>
+        </div>
+        <div class="profile-container">
+          <div class="profile-preview">
+            <img id="profile-avatar" src="" alt="Avatar">
+            <h3 id="profile-name">Player</h3>
+            <p id="profile-bio">Belum ada bio</p>
+            <div class="profile-meta">
+              <span><i class="fas fa-calendar"></i> Bergabung: <span id="profile-joined">-</span></span>
+              <span><i class="fas fa-box"></i> Mod dibagikan: <span id="profile-mods">0</span></span>
+            </div>
+          </div>
+          <form id="profile-form" class="profile-form">
+            <div class="form-group">
+              <label>Username</label>
+              <input type="text" id="edit-username" required>
+            </div>
+            <div class="form-group">
+              <label>Bio</label>
+              <textarea id="edit-bio" rows="3" placeholder="Ceritakan tentang dirimu..."></textarea>
+            </div>
+            <div class="form-group">
+              <label>Avatar Seed</label>
+              <input type="text" id="edit-avatar" placeholder="Ketik apa saja (contoh: madara, cj)">
+            </div>
+            <div class="form-group">
+              <label>Faction / Server Favorit</label>
+              <input type="text" id="edit-faction" placeholder="Contoh: Grove Street">
+            </div>
+            <button type="submit" class="btn-primary"><i class="fas fa-save"></i> Simpan</button>
+          </form>
+        </div>
+      </section>
+    </main>
+
+    <div id="toast" class="toast hidden"></div>
+  </div>
+
+  <!-- Config (user must fill Firebase + Discord) -->
+  <script src="config.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
